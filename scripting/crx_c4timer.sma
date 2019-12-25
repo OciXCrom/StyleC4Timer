@@ -10,7 +10,7 @@
 	#endif
 #endif
 
-new const PLUGIN_VERSION[] = "3.0"
+new const PLUGIN_VERSION[] = "3.1"
 new const SYM_NEWLINE[] = "%n%"
 
 #if !defined MAX_NAME_LENGTH
@@ -70,6 +70,7 @@ enum _:Settings
 	MESSAGE_TYPE,
 	bool:OVERWRITE_ROUND_TIMER,
 	TIMER_SYNC,
+	START_MESSAGE_AT,
 	START_VOICE_AT,
 	VOICE_SPEAKER[MAX_NAME_LENGTH]
 }
@@ -359,6 +360,10 @@ ReadFile()
 							{
 								g_eSettings[TIMER_SYNC] = str_to_num(szValue)
 							}
+							else if(equal(szKey, "START_MESSAGE_AT"))
+							{
+								g_eSettings[START_MESSAGE_AT] = str_to_num(szValue)
+							}
 							else if(equal(szKey, "START_VOICE_AT"))
 							{
 								g_eSettings[START_VOICE_AT] = str_to_num(szValue)
@@ -510,6 +515,11 @@ public timer_display(iEnt)
 	{
 		if(g_iCurrentTimer >= 0)
 		{
+			if(g_eSettings[START_MESSAGE_AT] && g_eSettings[START_MESSAGE_AT] < g_iCurrentTimer)
+			{
+				goto @AFTER_MESSAGE
+			}
+
 			if(g_eSettings[MESSAGE_TYPE] != MSGTYPE_CENTER)
 			{
 				switch(g_eSettings[COLOR_MODE])
@@ -568,6 +578,8 @@ public timer_display(iEnt)
 					client_print(0, print_center, g_szTimer, g_iCurrentTimer)
 				}
 			}
+
+			@AFTER_MESSAGE:
 
 			if(0 < g_iCurrentTimer <= g_eSettings[START_VOICE_AT])
 			{
